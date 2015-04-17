@@ -3,9 +3,9 @@ Web sockets Swarm Client
 
 
 Development:
-      <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmDebug.js"></script>
-      <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmClient.js"></script>
-      <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmHub.js"></script>
+            <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmDebug.js"></script>
+            <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmClient.js"></script>
+            <script src="https://rawgit.com/salboaie/WSSwarmClient/master/src/SwarmHub.js"></script>
 
 
 Production

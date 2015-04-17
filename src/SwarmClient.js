@@ -110,6 +110,8 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
 
     }
 
+    this.logout = this.destroySocket;
+
     function socket_onError(err) {
         lprint("Unexpected socket error");
         if(err){
