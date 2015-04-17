@@ -115,6 +115,35 @@ function SwarmHub(swarmConnection){
             }
         }
     };
+
+    /*
+        generic observer implementation for Java Script. Created especially for integration swarms with angular.js projects. Usually angular services should be observable by controllers
+     */
+    this.createObserver = function(template){
+        function Observer(){
+            var observers = [];
+            var notifiedAtLeastOnce = false;
+
+            for(var v in template){
+                this[v] = template[v];
+            }
+
+            this.observe = function(c, preventAtLeastOnce){
+                observers.push(c);
+                if(!preventAtLeastOnce && notifiedAtLeastOnce){
+                    c();
+                }
+            }
+
+            this.notify = function(){
+                observers.forEach(function(c){
+                    c();
+                    notifiedAtLeastOnce = true;
+                })
+            }
+        }
+        return new Observer(template);
+    }
 }
 
 //global variable
