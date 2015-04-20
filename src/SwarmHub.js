@@ -138,8 +138,8 @@ function SwarmHub(swarmConnection){
             this.notify = function(){
                 observers.forEach(function(c){
                     c();
-                    notifiedAtLeastOnce = true;
                 })
+                notifiedAtLeastOnce = true;
             }
         }
         return new Observer(template);
