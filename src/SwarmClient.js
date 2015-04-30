@@ -43,7 +43,6 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         isConnected = false;
         if(useSocketIo){
             if(socket){
-
                 socket = io.connect(null, {transports: ['websocket', 'polling', 'flashsocket'],
                                             'force new connection':true});
             } else {
@@ -59,14 +58,15 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
                  'reconnect'
                  */
                 socket = io.connect(connectionString);
-                socket.on('connect', socket_onConnect);
-                socket.on('data', socket_onStreamData);
-                socket.on('message', socket_onStreamData);
-                socket.on('error', socket_onError);
-                socket.on('disconnect', socket_onDisconnect);
-                socket.on('retry', socket_onRetry);
-                socket.on('reconnect', socket_onReconect);
             }
+
+            socket.on('connect', socket_onConnect);
+            socket.on('data', socket_onStreamData);
+            socket.on('message', socket_onStreamData);
+            socket.on('error', socket_onError);
+            socket.on('disconnect', socket_onDisconnect);
+            socket.on('retry', socket_onRetry);
+            socket.on('reconnect', socket_onReconect);
         } else {
             dprint("Connecting to the Web Socket server: ", connectionString);
             socket = new WebSocket(connectionString);
