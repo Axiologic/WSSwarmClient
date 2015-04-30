@@ -42,12 +42,12 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         lprint("Creating a new socket");
         isConnected = false;
         if(useSocketIo){
-            if(socket){
+
+            /*if(socket){
                 socket = io.connect(null, {transports: ['websocket', 'polling', 'flashsocket'],
                                             'force new connection':true});
             } else {
                 //TODO:implement all handlers
-                /*
                  'message'
                  'connect'
                  'disconnect'
@@ -56,9 +56,9 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
                  'error'
                  'retry'
                  'reconnect'
-                 */
-                socket = io.connect(connectionString);
-            }
+            }*/
+
+            socket = io.connect(connectionString);
 
             socket.on('connect', socket_onConnect);
             socket.on('data', socket_onStreamData);
