@@ -14,3 +14,10 @@ eprint = function(){
 cprint = function(){
     console.log.apply(console, arguments);
 }
+
+
+user_alert = function(message, callback){
+    alert(message);
+    console.log("callback...");
+    callback();
+}

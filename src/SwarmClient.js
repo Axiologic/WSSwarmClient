@@ -16,7 +16,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
     var currentFunction = waitingForIdentity;
     var connectionInProgress = false;
     var isConnected = false;
-    var nrAttemptReconnect = 8;
+    var nrAttemptReconnect = 2;
     var currentAttemptToReconnect = 0;
     var connectionString;
     if(useSocketIo){
@@ -125,14 +125,8 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         socket_onDisconnect();
     }
 
-    var showingAlert = false;
+    var showingAlert = true;
     function socket_onDisconnect(err) {
-        /*if(errorFunction){
-            errorFunction(err);
-        }else{
-
-        }*/
-
         if(currentAttemptToReconnect < nrAttemptReconnect) {
 
             if (!useSocketIo) {
@@ -147,14 +141,13 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         }
         setTimeout(function(){
             if(isConnected){
-                //console.log("isConnected",isConnected);
                 currentAttemptToReconnect = 0;
             }else{
                 currentAttemptToReconnect++
                 if(currentAttemptToReconnect == nrAttemptReconnect){
                     if(!showingAlert){
                         showingAlert = true;
-                        shape.alert("Network connection is down. Click ok to connect!", function(){
+                        user_alert("Network connection is down. Click ok to connect!", function(){
                             showingAlert = false;
                             if(!useSocketIo){
                                 try{
@@ -194,9 +187,9 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         tenantId   = __tenantId;
         loginCtor  = __loginCtor;
 
-        if(!isConnected){
+        /*if(!isConnected){
             return;
-        }
+        } */
         if(useSocketIo){
             if(recreateConnection) {
                 createSocket();
@@ -297,9 +290,6 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
 
     function getIdentity() {
         lprint("Preparing for communication...");
-        /* if (connectionInProgress) {
-            return;
-        } */
         connectionInProgress = true;
         outletId = "";
         sessionId = null;
