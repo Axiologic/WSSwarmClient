@@ -76,6 +76,10 @@ function SwarmHub(swarmConnection){
         pendingCommands.push(args);
     }
 
+    this.getConnection = function(){
+        return swarmConnection;
+    }
+
     this.resetConnection = function (newConnection){
         if(swarmConnection !== newConnection){
             swarmConnection = newConnection;
