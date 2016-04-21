@@ -44,26 +44,26 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         if(useSocketIo){
 
             /*if(socket){
-                socket = io.connect(null, {transports: ['websocket', 'polling', 'flashsocket'],
-                                            'force new connection':true});
-            } else {
-                //TODO:implement all handlers
-                 'message'
-                 'connect'
-                 'disconnect'
-                 'open'
-                 'close'
-                 'error'
-                 'retry'
-                 'reconnect'
-            }*/
+             socket = io.connect(null, {transports: ['websocket', 'polling', 'flashsocket'],
+             'force new connection':true});
+             } else {
+             //TODO:implement all handlers
+             'message'
+             'connect'
+             'disconnect'
+             'open'
+             'close'
+             'error'
+             'retry'
+             'reconnect'
+             }*/
 
             socket = io.connect(connectionString);
-
             socket.on('connect', socket_onConnect);
             socket.on('data', socket_onStreamData);
             socket.on('message', socket_onStreamData);
             socket.on('error', socket_onError);
+            socket.on('connect_error', socket_onError);
             socket.on('disconnect', socket_onDisconnect);
             socket.on('retry', socket_onRetry);
             socket.on('reconnect', socket_onReconect);
@@ -78,9 +78,9 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
             socket.onopen   =  socket_onConnect;
 
             setTimeout(function(){
-                     if(socket.readyState != 1){
-                         socket.onerror();
-                     }
+                if(socket.readyState != 1){
+                    socket.onerror();
+                }
             }, 1000);
         }
 
@@ -180,16 +180,24 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         currentFunction(data);
     }
 
-    this.tryLogin = function(__userId, __authToken, __tenantId, __loginCtor, recreateConnection){
+    this.tryLogin = function(__userId, __authToken, __tenantId, __loginCtor, recreateConnection, securityErrFn, errorFn){
 
         userId     = __userId;
         authToken  = __authToken;
         tenantId   = __tenantId;
         loginCtor  = __loginCtor;
 
+        if(securityErrFn){
+            securityErrorFunction = securityErrFn;
+        }
+        if(errorFn){
+            errorFunction =  errorFn;
+        }
+
+
         /*if(!isConnected){
-            return;
-        } */
+         return;
+         } */
         if(useSocketIo){
             if(recreateConnection) {
                 createSocket();
@@ -210,7 +218,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
                 command: "start",
                 ctor: loginCtor,
                 tenantId: tenantId,
-                commandArguments: [sessionId, userId, authToken]
+                commandArguments: [userId, authToken]
             }
         };
         self.writeObject(cmd);
@@ -225,8 +233,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
             if (apiVersion !== "2.0") {
                 lprint("Api version doesn't match !", "Api version error, 2.0 expected");
             }
-
-            doLogin(userId, authToken, tenantId, loginCtor);
+                doLogin(userId, authToken, tenantId, loginCtor);
         }
     }
 
@@ -297,12 +304,12 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         pendingCmds = [];
         currentFunction = waitingForIdentity;
         var cmd = {
-                meta: {
-                    swarmingName: 'login.js',
-                    command: 'getIdentity',
-                    ctor: 'authenticate'
-                }
-            };
+            meta: {
+                swarmingName: 'login.js',
+                command: 'getIdentity',
+                ctor: 'authenticate'
+            }
+        };
         self.writeObject(cmd);
     }
 
@@ -381,5 +388,4 @@ if(typeof(objectIsShapeSerializable) == "undefined"){
         return false;
     }
 }
-
 

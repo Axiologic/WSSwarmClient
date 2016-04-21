@@ -1,5 +1,5 @@
 /*
-        easy API for listening swarm events. On on funcitions you add listeners for both swarm type and phase name
+ easy API for listening swarm events. On on funcitions you add listeners for both swarm type and phase name
  */
 function SwarmHub(swarmConnection){
     var callBacks = {};
@@ -41,17 +41,17 @@ function SwarmHub(swarmConnection){
             }
         }
 
-         var phasePlace = swarmPlace[phase];
-         if(!phasePlace){
-                swarmPlace[phase] = callBack;
-             }
-         else{
-             if(phasePlace instanceof Array){
-                 phasePlace.push(callBack);
-             } else {
-                 swarmPlace[phase] = [phasePlace, callBack];
-             }
-         }
+        var phasePlace = swarmPlace[phase];
+        if(!phasePlace){
+            swarmPlace[phase] = callBack;
+        }
+        else{
+            if(phasePlace instanceof Array){
+                phasePlace.push(callBack);
+            } else {
+                swarmPlace[phase] = [phasePlace, callBack];
+            }
+        }
     }
 
 
@@ -63,7 +63,7 @@ function SwarmHub(swarmConnection){
                 c.splice(idx, 1);
             }
         } else {
-                delete callBacks[swarm][phase];
+            delete callBacks[swarm][phase];
         }
     }
 
@@ -109,6 +109,7 @@ function SwarmHub(swarmConnection){
         swarmConnectionCallbacks = [];
     }
     this.on("login.js", "success", startWaitingCallbacks);
+    this.on("login.js", "restoreSucceed", startWaitingCallbacks);
 
     this.onSwarmConnection = function (callback) {
         if (swarmSystemAuthenticated) {
@@ -121,10 +122,10 @@ function SwarmHub(swarmConnection){
     };
 
     /*
-        generic observer implementation for Java Script. Created especially for integration swarms with angular.js projects. Usually angular services should be observable by controllers
+     generic observer implementation for Java Script. Created especially for integration swarms with angular.js projects. Usually angular services should be observable by controllers
      */
     this.createObservable = function(template){
-        function ObservableObject(){
+        function Observer(){
             var observers = [];
             var notifiedAtLeastOnce = false;
 
@@ -146,7 +147,7 @@ function SwarmHub(swarmConnection){
                 notifiedAtLeastOnce = true;
             }
         }
-        return new ObservableObject(template);
+        return new Observer(template);
     }
 }
 
