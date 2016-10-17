@@ -68,14 +68,22 @@ function SwarmHub(swarmConnection){
     }
 
     var pendingCommands = [];
+
     var disconected_start_swarm = function(){
         var args = [];
-        args.push({
+        var newCmd = {
             meta: {
                 swarmingName: arguments[0]
+            },
+            pending:{
+
             }
-        });
-        for(var i= 1,len = arguments.length; i<len;i++){
+        }
+        newCmd.onResult = function(phaseName, callback){
+            newCmd.pending[phaseName] = callback;
+        }
+        args.push(newCmd);
+        for(var i = 1,len = arguments.length; i<len;i++){
             args.push(arguments[i]);
         }
         pendingCommands.push(args);
@@ -105,7 +113,10 @@ function SwarmHub(swarmConnection){
         self.startSwarm =  swarmConnection.startSwarm.bind(swarmConnection);
 
         pendingCommands.forEach(function(args){
-            self.startSwarm.apply(self, args);
+            var cmd = self.startSwarm.apply(self, args);
+            for(var phaseName in cmd.pending){
+                cmd.onResponse(phaseName,cmd.pending[phaseName] );
+            }
         })
         pendingCommands = [];
 

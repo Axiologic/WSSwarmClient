@@ -323,7 +323,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
     var counter = 0;
     var filters = new WeakMap();
 
-    var internal_onResponse = function(phaseName, callback){
+    this.template_onResponse = function(phaseName, callback){
         filters.set[this.meta.requestId + phaseName] = callback;
     }
 
@@ -346,6 +346,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
             var cmd = {
 
             };
+            cmd.onResponse = this.template_onResponse.bind(cmd);
         }
         var meta =  {
             sessionId: sessionId,
@@ -375,7 +376,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         else {
             pendingCmds.push(cmd);
         }
-        cmd.onResponse = internal_onResponse.bind(cmd);
+        
         return cmd;
     }
 
