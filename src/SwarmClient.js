@@ -278,6 +278,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         }
 
         callSwarmingCallBack(data.meta.swarmingName, data);
+        filter_onResult(data);
     }
 
     function callSwarmingCallBack(swarmingName, data) {
@@ -319,25 +320,54 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         return outletId + "/" + requestCounter;
     }
 
-    this.startSwarm = function (swarmName, ctorName) {
-        var args = Array.prototype.slice.call(arguments,2);
-        for(var i=0;i<args.length; i++ ){
-            if(objectIsShapeSerializable(args[i])){
-                args[i] = args[i].getInnerValues();
-            }
+    var counter = 0;
+    var filters = new WeakMap();
+
+    var internal_onResponse = function(phaseName, callback){
+        filters.set[this.meta.requestId + phaseName] = callback;
+    }
+
+    function filter_onResult(data){
+        var name = data.meta.requestId + data.meta.swarmingName;
+        var callback = filters.get(name);
+        if(callback){
+            callback(data);
         }
-        var cmd = {
-            meta: {
-                sessionId: sessionId,
+    }
+
+    this.startSwarm = function (swarmName, ctorName) {
+        var cmd;
+        counter++;
+        var requestId = outletId + counter;
+        if(typeof swarmName !== "string"){
+            cmd = swarmName;
+            swarmName = swarmName.meta.swarmingName;
+        } else {
+            var cmd = {
+
+            };
+        }
+        var meta =  {
+            sessionId: sessionId,
                 processIdentity:createRequestIdentity(),
                 swarmingName: swarmName,
                 tenantId: tenantId,
                 outletId: outletId,
                 command: "start",
                 ctor: ctorName,
-                commandArguments: args
+                commandArguments: args,
+                requestId:requestId
+        }
+
+        cmd.meta = meta;
+
+        var args = Array.prototype.slice.call(arguments,2);
+        for(var i=0;i<args.length; i++ ){
+            if(objectIsShapeSerializable(args[i])){
+                args[i] = args[i].getInnerValues();
             }
-        };
+        }
+
 
         if (loginOk == true) {
             self.writeObject(cmd);
@@ -345,6 +375,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         else {
             pendingCmds.push(cmd);
         }
+        cmd.onResponse = internal_onResponse.bind(cmd);
         return cmd;
     }
 

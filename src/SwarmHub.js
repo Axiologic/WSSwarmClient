@@ -68,13 +68,20 @@ function SwarmHub(swarmConnection){
     }
 
     var pendingCommands = [];
-    this.startSwarm = function(){
+    var disconected_start_swarm = function(){
         var args = [];
-        for(var i= 0,len= arguments.length; i<len;i++){
+        args.push({
+            meta: {
+                swarmingName: arguments[0]
+            }
+        });
+        for(var i= 1,len = arguments.length; i<len;i++){
             args.push(arguments[i]);
         }
         pendingCommands.push(args);
     }
+
+    this.startSwarm = disconected_start_swarm;
 
     this.getConnection = function(){
         return swarmConnection;
