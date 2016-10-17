@@ -321,15 +321,15 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
     }
 
     var counter = 0;
-    var filters = new WeakMap();
+    var filters = {};
 
     this.template_onResponse = function(phaseName, callback){
-        filters.set[this.meta.requestId + phaseName] = callback;
+        filters[this.meta.requestId + phaseName] = callback;
     }
 
     function filter_onResult(data){
-        var name = data.meta.requestId + data.meta.swarmingName;
-        var callback = filters.get(name);
+        var name = data.meta.requestId + data.meta.currentPhase;
+        var callback = filters[name];
         if(callback){
             callback(data);
         }
@@ -348,6 +348,13 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
             };
             cmd.onResponse = this.template_onResponse.bind(cmd);
         }
+        var args = Array.prototype.slice.call(arguments,2);
+        for(var i=0;i<args.length; i++ ){
+            if(objectIsShapeSerializable(args[i])){
+                args[i] = args[i].getInnerValues();
+            }
+        }
+
         var meta =  {
             sessionId: sessionId,
                 processIdentity:createRequestIdentity(),
@@ -361,14 +368,6 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         }
 
         cmd.meta = meta;
-
-        var args = Array.prototype.slice.call(arguments,2);
-        for(var i=0;i<args.length; i++ ){
-            if(objectIsShapeSerializable(args[i])){
-                args[i] = args[i].getInnerValues();
-            }
-        }
-
 
         if (loginOk == true) {
             self.writeObject(cmd);
