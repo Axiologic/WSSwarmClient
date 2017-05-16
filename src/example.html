@@ -41,10 +41,10 @@
 			loggedIn = swarm.authenticated;
 			localStorage.setItem("sessionId", swarm.meta.sessionId);
 			localStorage.setItem("userId", swarm.userId);
-
+			
+			console.log("Authenticated!");
 			swarmHub.off("login.js","success");
 		});
-		
 	</script>
 </body>
 </html>
