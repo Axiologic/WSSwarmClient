@@ -1,4 +1,3 @@
-
 /**********************************************************************************************
  * SwarmClient Class: web browser client, using websockets
  **********************************************************************************************/
@@ -233,7 +232,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
             if (apiVersion !== "2.0") {
                 lprint("Api version doesn't match !", "Api version error, 2.0 expected");
             }
-                doLogin(userId, authToken, tenantId, loginCtor);
+            doLogin(userId, authToken, tenantId, loginCtor);
         }
     }
 
@@ -357,14 +356,14 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
 
         var meta =  {
             sessionId: sessionId,
-                processIdentity:createRequestIdentity(),
-                swarmingName: swarmName,
-                tenantId: tenantId,
-                outletId: outletId,
-                command: "start",
-                ctor: ctorName,
-                commandArguments: args,
-                requestId:requestId
+            processIdentity:createRequestIdentity(),
+            swarmingName: swarmName,
+            tenantId: tenantId,
+            outletId: outletId,
+            command: "start",
+            ctor: ctorName,
+            commandArguments: args,
+            requestId:requestId
         }
 
         cmd.meta = meta;
@@ -375,7 +374,7 @@ function SwarmClient(host, port, userId, authToken, tenantId, loginCtor, securit
         else {
             pendingCmds.push(cmd);
         }
-        
+
         return cmd;
     }
 
@@ -419,4 +418,3 @@ if(typeof(objectIsShapeSerializable) == "undefined"){
         return false;
     }
 }
-

@@ -1,16 +1,20 @@
-/*
- easy API for listening swarm events. On on funcitions you add listeners for both swarm type and phase name
- */
-function SwarmHub(swarmConnection){
+function SwarmHub(iframeSlave){
     var callBacks = {};
     var self = this;
+
+    var connection;
+	var swarmConnection;
+
+    if(iframeSlave){
+        connection = CommunicationService.prototype.getHubConnection(iframeSlave);
+    }
 
     function dispatchingCallback(swarm){
         var o = callBacks[swarm.meta.swarmingName];
         if(o){
             var myCall = o[swarm.meta.currentPhase];
             if(!myCall){
-                cprint("Warning: Nobody listens for swarm " + swarm.meta.swarmingName + " and phase " + swarm.meta.currentPhase);
+				dispatchToSlave(swarm);
             } else {
                 try{
                     if(myCall instanceof Array){
@@ -26,19 +30,32 @@ function SwarmHub(swarmConnection){
 
             }
         } else {
-            cprint("Warning: Nobody listens for swarm " + swarm.meta.swarmingName + " and phase " + swarm.meta.currentPhase);
+            dispatchToSlave(swarm);
         }
     }
 
+    function dispatchToSlave(swarm){
+		cprint("Info: Nobody listens for swarm " + swarm.meta.swarmingName + " and phase " + swarm.meta.currentPhase + " in master frame");
+
+		if(self.sendMessagesToSlave)
+		{
+			cprint("Info: Trying to send into slave frame...");
+			self.sendMessagesToSlave(swarm);
+		}
+    }
+
+    function setSwarmConnectionListner(swarmName){
+        if(swarmConnection){
+            swarmConnection.on(swarmName, dispatchingCallback);
+        }
+    }
 
     this.on = function(swarmName, phase, callBack){
         var swarmPlace = callBacks[swarmName];
         if(!swarmPlace){
             swarmPlace = {};
             callBacks[swarmName] = swarmPlace;
-            if(swarmConnection){
-                swarmConnection.on(swarmName, dispatchingCallback);
-            }
+            setSwarmConnectionListner(swarmName);
         }
 
         var phasePlace = swarmPlace[phase];
@@ -90,20 +107,62 @@ function SwarmHub(swarmConnection){
     }
 
     this.startSwarm = disconected_start_swarm;
+	
+	function receiveMessageFromSlave(event){
+		var message = event.data;
+		var args = message.data;
+		if(args && args.length && args.length>1){
+			var swarmName = args[0];
+			var swarmPhase = args[1];
 
-    this.getConnection = function(){
-        return swarmConnection;
+			if(!self.sendMessagesToSlave){
+                self.sendMessagesToSlave = function(swarm){
+                    if(!swarm.meta){
+                        //just a simple test in order to check if we got a swarm object
+                        return;
+                    }
+                    //reply to Slave
+                    if(connection){
+                        connection.publishToChannel(swarm.meta.swarmingName, swarm);
+                    }
+                }
+            }
+
+            setSwarmConnectionListner(swarmName);
+			self.startSwarm.apply(self, args);
+			
+		}else{
+			eprint("The message should include swarmName and swarmPhase");
+		}
+	}
+	
+	if(connection){
+	    connection.subscribe(receiveMessageFromSlave);
     }
 
-    this.resetConnection = function (newConnection){
-        if(swarmConnection !== newConnection){
-            swarmConnection = newConnection;
-            for(var v in callBacks){
-                swarmConnection.on(v,dispatchingCallback);
+    function doConnection(loginCtor, username, password, expectedPhase, successHandler, errorHandler){
+        var config = Config().swarmClient;
+        var self = this;
+        this.on("login.js", expectedPhase, function (swarm) {
+            if(successHandler){
+                successHandler(swarm.authenticated, swarm.sessionId);
             }
+            self.off("login.js", expectedPhase);
+        });
+
+        if(swarmConnection){
+			swarmConnection.tryLogin(username, password, config.tenant, loginCtor, false, loginCtor, errorHandler);
+        }else{
+			swarmConnection = new SwarmClient(config.host, config.port, username, password, config.tenant, loginCtor, errorHandler);
+			for(var callback in callBacks){
+				swarmConnection.on(callback, dispatchingCallback);
+			}
         }
     }
 
+	this.initConnection = function(loginCtor, username, password, expectedPhase, successHandler, errorHandler){
+        doConnection.call(this, loginCtor, username, password, expectedPhase, successHandler, errorHandler);
+	}
 
     var swarmSystemAuthenticated = false;
     var swarmConnectionCallbacks = [];
@@ -126,8 +185,6 @@ function SwarmHub(swarmConnection){
         })
         swarmConnectionCallbacks = [];
     }
-    this.on("login.js", "success", startWaitingCallbacks);
-    this.on("login.js", "restoreSucceed", startWaitingCallbacks);
 
     this.onSwarmConnection = function (callback) {
         if (swarmSystemAuthenticated) {
@@ -139,35 +196,6 @@ function SwarmHub(swarmConnection){
         }
     };
 
-    /*
-     generic observer implementation for Java Script. Created especially for integration swarms with angular.js projects. Usually angular services should be observable by controllers
-     */
-    this.createObservable = function(template){
-        function Observer(){
-            var observers = [];
-            var notifiedAtLeastOnce = false;
-
-            for(var v in template){
-                this[v] = template[v];
-            }
-
-            this.observe = function(c, preventAtLeastOnce){
-                observers.push(c);
-                if(!preventAtLeastOnce && notifiedAtLeastOnce){
-                    c();
-                }
-            }
-
-            this.notify = function(){
-                observers.forEach(function(c){
-                    c();
-                })
-                notifiedAtLeastOnce = true;
-            }
-        }
-        return new Observer(template);
-    }
+	this.on("login.js", "success", startWaitingCallbacks);
+    this.on("login.js", "restoreSucceed", startWaitingCallbacks);
 }
-
-//global variable
-swarmHub = new SwarmHub();
