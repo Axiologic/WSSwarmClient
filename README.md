@@ -1,7 +1,7 @@
 # WSSwarmClient
 		
 Master App
-
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,11 +36,11 @@ Master App
 	</script>
 </body>
 </html>
-
+```
 
 
 Child App
-
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -65,3 +65,4 @@ Child App
 	</script>
 </body>
 </html>
+```
